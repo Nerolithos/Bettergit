@@ -1,0 +1,283 @@
+{
+  "summary": {
+    "created_at": "2026-10-30T02:46:41.508744+00:00",
+    "python": "3.12.4",
+    "git": "/opt/homebrew/Cellar/git/2.45.2/bin/git",
+    "isolation": {
+      "private_home": true,
+      "private_zdotdir": true,
+      "system_git_config_disabled": true,
+      "network_protocols_disabled": true
+    },
+    "checks": [
+      {
+        "name": "versions",
+        "exit_code": 0,
+        "seconds": 0.04,
+        "log": "/private/tmp/bettergit-optimized-verified/versions.log"
+      },
+      {
+        "name": "unittest",
+        "exit_code": 0,
+        "seconds": 47.297,
+        "log": "/private/tmp/bettergit-optimized-verified/unittest.log"
+      },
+      {
+        "name": "workflow_measurement",
+        "exit_code": 0,
+        "seconds": 1.268,
+        "log": "/private/tmp/bettergit-optimized-verified/workflow_measurement.log"
+      },
+      {
+        "name": "diagnostic_evaluation",
+        "exit_code": 0,
+        "seconds": 0.075,
+        "log": "/private/tmp/bettergit-optimized-verified/diagnostic_evaluation.log"
+      },
+      {
+        "name": "zsh_syntax",
+        "exit_code": 0,
+        "seconds": 0.021,
+        "log": "/private/tmp/bettergit-optimized-verified/zsh_syntax.log"
+      },
+      {
+        "name": "zsh_smoke",
+        "exit_code": 0,
+        "seconds": 0.234,
+        "log": "/private/tmp/bettergit-optimized-verified/zsh_smoke.log"
+      }
+    ],
+    "isolated_config_unchanged": true,
+    "protected_user_configs_unchanged": true,
+    "passed": true
+  },
+  "unittest_count": 73,
+  "sigkill_matrix_scenarios": 16,
+  "random_replay_seeds": 6,
+  "workflow_measurements": [
+    {
+      "scenario": "fast_forward",
+      "plan_git_invocations": 11,
+      "plan_seconds": 0.1358,
+      "apply_git_invocations": 9,
+      "apply_seconds": 0.0819,
+      "commands": {
+        "probe:rev-parse": 1,
+        "probe:status": 5,
+        "probe:config": 4,
+        "probe:for-each-ref": 4,
+        "run:fetch": 1,
+        "probe:rev-list": 1,
+        "probe:diff": 1,
+        "probe:update-ref": 2,
+        "run:merge": 1
+      },
+      "per_exec_250ms_overhead_model_seconds": 5.0,
+      "model_is_not_observed_runtime": true
+    },
+    {
+      "scenario": "diverged_clean_merge",
+      "plan_git_invocations": 16,
+      "plan_seconds": 0.1808,
+      "apply_git_invocations": 14,
+      "apply_seconds": 0.1367,
+      "commands": {
+        "probe:rev-parse": 1,
+        "probe:status": 7,
+        "probe:config": 6,
+        "probe:for-each-ref": 6,
+        "run:fetch": 1,
+        "probe:rev-list": 1,
+        "probe:merge-tree": 2,
+        "probe:diff": 2,
+        "probe:update-ref": 2,
+        "run:merge": 1,
+        "probe:show": 1
+      },
+      "per_exec_250ms_overhead_model_seconds": 7.5,
+      "model_is_not_observed_runtime": true
+    }
+  ],
+  "comparison": [
+    {
+      "scenario": "fast_forward",
+      "before_direct_git_invocations": 69,
+      "after_direct_git_invocations": 20,
+      "reduction_percent": 71.01,
+      "before_observed_seconds": 0.8273,
+      "after_observed_seconds": 0.2177,
+      "timing_scope": "single local sample per scenario, not a general benchmark"
+    },
+    {
+      "scenario": "diverged_clean_merge",
+      "before_direct_git_invocations": 74,
+      "after_direct_git_invocations": 30,
+      "reduction_percent": 59.46,
+      "before_observed_seconds": 0.8743,
+      "after_observed_seconds": 0.3175,
+      "timing_scope": "single local sample per scenario, not a general benchmark"
+    }
+  ],
+  "diagnostic_evaluation": {
+    "schema": 1,
+    "scope": "labelled fixtures, not real-world accuracy or probability calibration",
+    "passed": true,
+    "cases": [
+      {
+        "name": "index_refresh",
+        "source": "synthetic_trace",
+        "expected": [
+          "filesystem"
+        ],
+        "actual": [
+          "filesystem"
+        ],
+        "unknown": false,
+        "matched": true
+      },
+      {
+        "name": "ssh_transport",
+        "source": "synthetic_trace",
+        "expected": [
+          "transport"
+        ],
+        "actual": [
+          "transport"
+        ],
+        "unknown": false,
+        "matched": true
+      },
+      {
+        "name": "credential_helper",
+        "source": "synthetic_trace",
+        "expected": [
+          "authentication"
+        ],
+        "actual": [
+          "authentication"
+        ],
+        "unknown": false,
+        "matched": true
+      },
+      {
+        "name": "hook_wait",
+        "source": "synthetic_trace",
+        "expected": [
+          "hook"
+        ],
+        "actual": [
+          "hook"
+        ],
+        "unknown": false,
+        "matched": true
+      },
+      {
+        "name": "shell_editor",
+        "source": "synthetic_trace",
+        "expected": [
+          "interaction"
+        ],
+        "actual": [
+          "interaction"
+        ],
+        "unknown": false,
+        "matched": true
+      },
+      {
+        "name": "signing_wait",
+        "source": "synthetic_trace",
+        "expected": [
+          "interaction"
+        ],
+        "actual": [
+          "interaction"
+        ],
+        "unknown": false,
+        "matched": true
+      },
+      {
+        "name": "misleading_remote_name",
+        "source": "synthetic_trace",
+        "expected": [
+          "transport"
+        ],
+        "actual": [
+          "transport"
+        ],
+        "unknown": false,
+        "matched": true
+      },
+      {
+        "name": "misleading_path_argument",
+        "source": "synthetic_trace",
+        "expected": [],
+        "actual": [],
+        "unknown": true,
+        "matched": true
+      },
+      {
+        "name": "finished_child",
+        "source": "synthetic_trace",
+        "expected": [],
+        "actual": [],
+        "unknown": true,
+        "matched": true
+      },
+      {
+        "name": "finished_session",
+        "source": "synthetic_trace",
+        "expected": [],
+        "actual": [],
+        "unknown": true,
+        "matched": true
+      },
+      {
+        "name": "no_evidence",
+        "source": "synthetic_trace",
+        "expected": [],
+        "actual": [],
+        "unknown": true,
+        "matched": true
+      }
+    ],
+    "per_label": {
+      "filesystem": {
+        "true_positive": 1,
+        "false_positive": 0,
+        "false_negative": 0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "transport": {
+        "true_positive": 2,
+        "false_positive": 0,
+        "false_negative": 0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "authentication": {
+        "true_positive": 1,
+        "false_positive": 0,
+        "false_negative": 0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "hook": {
+        "true_positive": 1,
+        "false_positive": 0,
+        "false_negative": 0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "interaction": {
+        "true_positive": 2,
+        "false_positive": 0,
+        "false_negative": 0,
+        "precision": 1.0,
+        "recall": 1.0
+      }
+    },
+    "unknown_cases": 4,
+    "seconds": 0.001842
+  }
+}

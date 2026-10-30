@@ -1,0 +1,118 @@
+{
+  "schema": 1,
+  "repository": {
+    "hostname": "github.com",
+    "owner": "demo",
+    "name": "project",
+    "number": 42
+  },
+  "pull_request": {
+    "number": 42,
+    "state": "open",
+    "draft": false,
+    "merged": false,
+    "mergeable": true,
+    "mergeable_state": "clean",
+    "merge_commit_sha": null,
+    "updated_at": "2026-10-30T00:00:00Z",
+    "head": {
+      "sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "base": {
+      "sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "ref": "main"
+    }
+  },
+  "branch": {
+    "status": "ok",
+    "data": {
+      "protected": false
+    },
+    "complete": true
+  },
+  "rules": {
+    "status": "ok",
+    "data": [
+      {
+        "type": "required_status_checks",
+        "parameters": {
+          "required_status_checks": [
+            {
+              "context": "ci"
+            },
+            {
+              "context": "integration"
+            }
+          ]
+        }
+      }
+    ],
+    "complete": true
+  },
+  "protection": {
+    "status": "not_applicable",
+    "data": {},
+    "complete": true
+  },
+  "checks": {
+    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa": {
+      "status": "ok",
+      "data": [
+        {
+          "id": 1,
+          "name": "ci",
+          "head_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "status": "completed",
+          "conclusion": "success",
+          "app": {
+            "id": 10
+          }
+        }
+      ],
+      "complete": true
+    }
+  },
+  "statuses": {
+    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa": {
+      "status": "ok",
+      "data": [],
+      "complete": true
+    }
+  },
+  "reviews": {
+    "status": "ok",
+    "data": [],
+    "complete": true
+  },
+  "review_summary": {
+    "status": "ok",
+    "data": {
+      "headRefOid": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "baseRefOid": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "reviewDecision": null,
+      "mergeStateStatus": "CLEAN"
+    },
+    "complete": true
+  },
+  "observed_again": {
+    "status": "ok",
+    "data": {
+      "number": 42,
+      "state": "open",
+      "draft": false,
+      "merged": false,
+      "mergeable": true,
+      "mergeable_state": "clean",
+      "merge_commit_sha": null,
+      "updated_at": "2026-10-30T00:00:00Z",
+      "head": {
+        "sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "base": {
+        "sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "ref": "main"
+      }
+    },
+    "complete": true
+  }
+}
