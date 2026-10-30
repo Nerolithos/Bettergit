@@ -98,14 +98,23 @@ def engine():
     return Engine(probe, run_git, confirm, say)
 
 
-def sync(fetch=True, plan_only=False, operation_id=None, json_output=False, push=False, yes=False):
+def sync(fetch=True, plan_only=False, operation_id=None, json_output=False, push=False, yes=False, automatic=False):
     try:
         workflow = engine()
         with workflow.store.lock():
+            snapshot_commit = None
+            if automatic:
+                from bettergit_autosync import commit_all
+                snapshot_commit = commit_all(workflow)
+                workflow.confirm = lambda question: True
+                push, yes = True, True
             if operation_id:
                 operation = workflow.store.load(operation_id)
             else:
                 operation = workflow.prepare(fetch=fetch, persist=fetch)
+            if snapshot_commit:
+                operation['snapshot_commit'] = snapshot_commit
+                workflow.store.save(operation)
             if json_output:
                 print(json.dumps(operation, ensure_ascii=True, indent=2))
             else:
@@ -179,13 +188,13 @@ def main(argv=None):
     doctor.add_argument('--json', action='store_true')
     doctor.add_argument('--save-baseline', action='store_true')
     doctor.add_argument('--compare', action='store_true')
-    sync_parser = commands.add_parser('sync', help='Fetch, preview, and confirm before merging')
+    sync_parser = commands.add_parser('sync', help='Automatically add all changes, commit a versioned timestamp, synchronize, and push')
     modes = sync_parser.add_mutually_exclusive_group()
     modes.add_argument('--plan', action='store_true', help='Save a plan and recovery references without merging')
     modes.add_argument('--apply', metavar='ID', help='Revalidate and apply a saved plan')
     modes.add_argument('--continue', dest='resume', metavar='ID', help='Continue a recorded unfinished merge')
     modes.add_argument('--abort', metavar='ID', help='Abort a recorded unfinished merge')
-    sync_parser.add_argument('--push', action='store_true', help='After synchronization, confirm and push committed history to the matching tracking branch')
+    sync_parser.add_argument('--push', action='store_true', help='Compatibility alias for automatic sync; with --apply, publish the reviewed plan')
     sync_parser.add_argument('--yes', action='store_true', help='Skip push confirmation with --push; merge confirmation is still required')
     sync_parser.add_argument('--json', action='store_true', help='Available with --plan only')
     commands.add_parser('check', help='Inspect the cached upstream without fetching or merging')
@@ -276,7 +285,8 @@ def main(argv=None):
                 workflow = engine()
                 with workflow.store.lock():
                     return workflow.resume(ns.resume or ns.abort, abort=bool(ns.abort))
-            return sync(plan_only=ns.plan, operation_id=ns.apply, json_output=ns.json, push=ns.push, yes=ns.yes)
+            return sync(plan_only=ns.plan, operation_id=ns.apply, json_output=ns.json, push=ns.push, yes=ns.yes,
+                        automatic=not (ns.plan or ns.apply))
         if ns.action == 'check':
             return sync(fetch=False)
         if ns.action == 'reconcile':

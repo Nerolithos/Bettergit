@@ -2,6 +2,25 @@
 from bettergit_snapshot import RepositorySnapshot
 
 
+def publication_target(engine, snapshot):
+    context = snapshot.context()
+    # A triangular push is a different workflow: never guess its destination.
+    target = context['push_target']
+    merge_refs = snapshot.config.get('branch.' + context['branch'] + '.merge', [])
+    if (not target or target['remote'] != context['remote'] or len(merge_refs) != 1
+            or target['ref'] != merge_refs[0] or not target['ref'].startswith('refs/heads/')
+            or target['remote'] == '.'):
+        raise RuntimeError('Publish requires the default push target to match the tracked remote branch. Configure an upstream and a matching push destination first.')
+    remote, ref = target['remote'], target['ref']
+    if snapshot.config.get('remote.' + remote + '.mirror', ['false'])[-1].lower() not in ('false', 'no', 'off', '0'):
+        raise RuntimeError('Mirror remotes are not supported by sync --push.')
+    urls = engine.get(['remote', 'get-url', '--push', '--all', '--', remote]).splitlines()
+    fetch_url = engine.get(['remote', 'get-url', '--', remote])
+    if len(urls) != 1 or urls[0] != fetch_url:
+        raise RuntimeError('Publish requires one push URL identical to the fetch URL; separate or multiple destinations need native Git review.')
+    return remote, ref
+
+
 def publish(engine, operation, yes=False):
     snapshot = RepositorySnapshot.read(engine)
     engine.require_clean(snapshot.state)
@@ -13,20 +32,8 @@ def publish(engine, operation, yes=False):
             or context != {key: operation[key] for key in context}
             or snapshot.refs.get(context['upstream']) != operation['target']):
         raise RuntimeError('The synchronization plan was not completed or no longer matches this branch; no push was attempted.')
-    # A triangular push is a different workflow: never guess its destination.
-    target = context['push_target']
-    merge_refs = snapshot.config.get('branch.' + context['branch'] + '.merge', [])
-    if (not target or target['remote'] != context['remote'] or len(merge_refs) != 1
-            or target['ref'] != merge_refs[0] or not target['ref'].startswith('refs/heads/')
-            or target['remote'] == '.'):
-        raise RuntimeError('Publish requires the default push target to match the tracked remote branch. Configure an upstream and a matching push destination first.')
-    remote, ref, head = target['remote'], target['ref'], snapshot.state.head
-    if snapshot.config.get('remote.' + remote + '.mirror', ['false'])[-1].lower() not in ('false', 'no', 'off', '0'):
-        raise RuntimeError('Mirror remotes are not supported by sync --push.')
-    urls = engine.get(['remote', 'get-url', '--push', '--all', '--', remote]).splitlines()
-    fetch_url = engine.get(['remote', 'get-url', '--', remote])
-    if len(urls) != 1 or urls[0] != fetch_url:
-        raise RuntimeError('Publish requires one push URL identical to the fetch URL; separate or multiple destinations need native Git review.')
+    remote, ref = publication_target(engine, snapshot)
+    head = snapshot.state.head
     upstream = snapshot.refs.get(context['upstream'])
     if not upstream:
         raise RuntimeError('The tracking reference is missing; fetch and retry.')
@@ -69,5 +76,5 @@ def publish(engine, operation, yes=False):
     if after.state.head != head or after.context() != context or after.state.dirty or after.state.active:
         engine.say('The pinned commit was verified remotely, but local state changed during push; inspect the worktree before continuing.')
         return 1
-    engine.say(f'Synchronized: remote branch verified at {head[:12]}. Uncommitted files are never uploaded.')
+    engine.say(f'Synchronized: remote branch verified at {head[:12]}.')
     return 0

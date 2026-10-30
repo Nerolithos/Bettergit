@@ -6,6 +6,7 @@
 | --- | --- |
 | bettergit.py | CLI, confirmations, native command execution, slow-command observer |
 | bettergit_recovery.py | Unified history inspection and detached checkpoint worktrees |
+| bettergit_autosync.py | Whole-repository staging and versioned snapshot commits for default sync |
 | bettergit_publish.py | Confirmed, pinned-commit publication and remote verification |
 | bettergit_snapshot.py | Short-lived worktree/configuration/reference observations |
 | bettergit_workflow.py | Merge plans, durable records, backup refs, reconciliation, recovery branches |
@@ -86,3 +87,11 @@ Publication and merge are separate operations: a failed push leaves local merge 
 `recover <ID> --worktree PATH` shares the existing confirmation and recovery model. It refuses existing destinations and nested worktrees, checks the checkpoint/destination again after confirmation, exclusively reserves the directory, and saves `creating_or_interrupted` before native Git creates the detached checkout. Checkout failure preserves the directory and records `needs_review`. Successful creation is verified against the expected commit, common repository, root, detached HEAD, and status. The current index/worktree is never reset or switched by this workflow. Hooks/filters can have external side effects and are not sandboxed.
 
 Git and the filesystem are not one transaction. Another process can still change paths or metadata; failures preserve evidence instead of deleting potentially valuable contents. Registration is observational, not a claim of content integrity. History displays at most 20 recent recovery attempts; the full record remains in JSON. Creation refuses invalid attempt records or more than 100 attempts per operation. General worktree creation, deletion, pruning, dependency installation, and environment copying are left to native tools.
+
+## Default automatic sync (supersedes the earlier opt-in publication default)
+
+Plain `sync` and compatibility `sync --push` now explicitly authorize repository-wide add-all, snapshot commit, clean-preview application, and publication without Bettergit confirmations. `--plan`, `--apply`, continue/abort, and the native pull wrapper retain their earlier reviewed behavior.
+
+Before staging, automatic sync checks branch/tracking identity, active operation markers, and the supported push destination. It respects ignore rules and does not stage from only the current subdirectory. After staging it rechecks branch/configuration/HEAD, avoids empty commits, generates `v0.0.N` from local first-parent count plus one and a UTC timestamp, and invokes native commit hooks/signing. The resulting commit must have the expected parent, matching context, and a clean worktree before proceeding. Snapshot metadata is attached to the merge operation record. Failure never restores over newer work or silently removes the local commit.
+
+These are snapshot labels, not semantic releases or globally unique identifiers after history rewriting. Initial empty repositories/remotes are not bootstrapped. Existing credentials, hooks, and signing may still require setup. Native Git and editors remain outside the Bettergit lock.

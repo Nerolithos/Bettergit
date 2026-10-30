@@ -11,11 +11,11 @@ Bettergit integrates with GitHub through the authenticated GitHub CLI (`gh`). It
 ## Why use it?
 
 - **Find out what Git is waiting for.** Identify active file scans, remote transport, credential helpers, hooks, editors, and signing processes. Unknown causes stay unknown.
-- **Synchronize committed work to GitHub.** Use `sync --push` to fetch, review any needed merge, publish one branch without force, and verify the remote commit.
+- **Save and synchronize in one command.** `sync` stages all non-ignored changes, commits a version and UTC timestamp, integrates clean remote updates, pushes, and verifies the remote commit.
 - **Review before you merge.** Fetch and preview with Git's own merge engine. See the commits and conflicted files before changing your worktree.
 - **Check what happened after an interruption.** Durable records and recovery references let you compare a saved plan with the actual repository state.
 - **Measure an optimization before adopting it.** Compare untracked-cache settings using disposable indexes, with no persistent configuration changes.
-- **Stay in control.** Merges require confirmation. No automatic force-push, stash, rebase, or generated conflict resolution.
+- **Stop on real conflicts.** Automatic sync applies clean previews only. No force-push, automatic stash/rebase, or generated conflict resolution. Saved-plan application and recovery still require confirmation.
 
 No AI API key, model service, Python packages, or background daemon required. CLI messages and test diagnostics are in English.
 
@@ -100,7 +100,7 @@ bettergit sync --apply <ID>
 
 Before applying, it rechecks your branch, upstream, configuration, worktree, and recovery references. It asks for confirmation and checks again after your answer. A stale plan is rejected.
 
-For a single interactive flow:
+For automatic staging, committing, merging, and publishing:
 
 ```zsh
 bettergit sync
@@ -114,54 +114,42 @@ bettergit check
 
 Clean previews establish mergeability, not application correctness: run your project's tests after merging.
 
-## Sync an existing repository to GitHub
+## One command to save and synchronize
 
-Already cloned or initialized a repository with a configured remote and tracking branch? Commit your work, then run:
-
-```zsh
-cd /path/to/your-repository
-bettergit sync --push
-```
-
-Without the shell integration:
-
-```sh
-python3 /path/to/Bettergit/bettergit.py sync --push
-```
-
-Bettergit fetches the tracked remote, previews incoming changes, asks before a needed merge, asks before publishing, and pushes the resulting committed history. It then reads the remote branch to verify the exact commit. Merge conflicts are reported before entering a merge; a rejected push preserves local commits. A remote update during the workflow may require another run.
-
-For an explicitly authorized non-interactive push:
+In an existing repository with a configured upstream and working GitHub credentials:
 
 ```zsh
-bettergit sync --push --yes
+bettergit sync
 ```
 
-`--yes` skips only the push confirmation. A needed merge still requires interactive confirmation; non-interactive runs stop before merging. Plain `bettergit sync` continues to fetch/merge without publishing, and the `git pull` integration never automatically pushes.
+From any subdirectory, Bettergit automatically:
 
-### Before the first sync
+1. Stages all repository changes: modifications, deletions, and non-ignored new files (`git add --all`).
+2. Creates a commit such as `Bettergit sync v0.0.42 | 2026-10-30T06:20:00Z`.
+3. Fetches the upstream and previews incoming changes with Git's merge engine.
+4. Applies a fast-forward or clean merge without asking, then pushes one branch without force.
+5. Reads the remote branch to verify the resulting commit.
 
-A plain `git init` does not configure a GitHub destination. Inspect the existing setup:
+No confirmation is required in this flow. `sync --push` and `sync --push --yes` remain compatibility spellings for the same automatic flow. Without shell integration, use `python3 /path/to/Bettergit/bettergit.py sync`.
 
-```sh
-git remote -v
-git branch -vv
-```
+**Snapshot versions:** `v0.0.N` uses the local branch's first-parent commit count plus one. It labels a snapshot, not a semantic release; it does not edit version files or create tags. Shallow or rewritten histories can repeat labels. The timestamp is UTC. No changes means no empty commit, while existing local commits can still be pushed.
 
-If the remote branch already exists but tracking is missing, fetch it and explicitly select it, for example:
+Git ignore rules remain active, and ignored files are never forced into the index. Existing staged changes are included together with other changes. Hooks, signing, authentication, and server branch rules remain active and may require prior setup or reject the operation.
+
+If the merge preview finds conflicts, sync reports the files and stops before entering a conflicted merge or pushing. The newly created local snapshot commit is preserved. Fetch, commit, and push failures also preserve local work for inspection/retry; synchronization is not an atomic transaction. Concurrent edits or unexpected hook changes stop publication. An unfinished Git operation must be resolved explicitly first.
+
+### Initial setup and reviewed workflows
+
+`git init` alone does not configure GitHub. Check `git remote -v` and `git branch -vv`. If the remote branch already exists, configure tracking explicitly, for example:
 
 ```sh
 git fetch origin
 git branch --set-upstream-to=origin/main
 ```
 
-Use your actual branch name. Creating a GitHub repository or making its first-ever push remains a native Git setup step. Unrelated histories are not automatically combined.
+Use your actual branch name. An initial commit, a matching tracked remote branch, one push URL equal to the fetch URL, and working author identity/authentication are required. New empty remotes, unrelated histories, mirror remotes, and triangular fork destinations are not automatically configured.
 
-Stage and commit the files you intend to publish before running sync. Bettergit never automatically stages files, creates a commit for your edits, or uploads uncommitted contents. Dirty worktrees stop with an explanation.
-
-Publishing requires the default push branch to match the upstream, with one push URL identical to the fetch URL. Separate fork destinations, mirror remotes, and multiple push URLs are refused. Only one pinned branch commit is pushed: no force, automatic tags, or recursive submodule pushes. Git hooks, authentication, and GitHub branch protection remain active; protected branches may require a pull request.
-
-**Live-tested on this repository:** on 2026-10-30, `sync --push --yes` published commit `db3393cce8d976f21c8355be57c06333d5c9aaca` to `Nerolithos/Bettergit`'s `main` branch and verified the remote commit. Local validation also passed 150 isolated tests, including 13 publication tests. See [validation results](docs/sync-review-results.json).
+For a review-first workflow, commit your changes yourself, use `sync --plan`, then `sync --apply <ID>` after inspection. These modes do not automatically stage or snapshot your files and still require confirmation for applying a merge. The `git pull` wrapper also retains its reviewed merge-only behavior; it never automatically stages, commits, or pushes.
 
 ## Inspect history and recover without disturbing today's work
 
@@ -222,7 +210,7 @@ After a supported `init`, Bettergit can offer a `.gitignore` for detected Python
 | `doctor` | Investigate local Git slowness |
 | `doctor --network` | Opt into a bounded read-only remote probe |
 | `doctor --experiment untracked-cache` | Compare a setting using temporary indexes |
-| `sync --push` | Fetch, review/merge, confirm publication, and verify the remote branch |
+| `sync` | Automatically stage, versioned-commit, integrate clean updates, push, and verify |
 | `sync --plan` | Fetch and save a merge preview |
 | `sync --apply <ID>` | Revalidate and confirm a saved merge plan |
 | `check` | Inspect cached upstream state |
