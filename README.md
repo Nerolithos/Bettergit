@@ -9,6 +9,7 @@ Keep using Git in your terminal. Add evidence when it gets slow, review a merge 
 ## Why use it?
 
 - **Find out what Git is waiting for.** Identify active file scans, remote transport, credential helpers, hooks, editors, and signing processes. Unknown causes stay unknown.
+- **Synchronize committed work to GitHub.** Use `sync --push` to fetch, review any needed merge, publish one branch without force, and verify the remote commit.
 - **Review before you merge.** Fetch and preview with Git's own merge engine. See the commits and conflicted files before changing your worktree.
 - **Check what happened after an interruption.** Durable records and recovery references let you compare a saved plan with the actual repository state.
 - **Measure an optimization before adopting it.** Compare untracked-cache settings using disposable indexes, with no persistent configuration changes.
@@ -111,6 +112,55 @@ bettergit check
 
 Clean previews establish mergeability, not application correctness: run your project's tests after merging.
 
+## Sync an existing repository to GitHub
+
+Already cloned or initialized a repository with a configured remote and tracking branch? Commit your work, then run:
+
+```zsh
+cd /path/to/your-repository
+bettergit sync --push
+```
+
+Without the shell integration:
+
+```sh
+python3 /path/to/Bettergit/bettergit.py sync --push
+```
+
+Bettergit fetches the tracked remote, previews incoming changes, asks before a needed merge, asks before publishing, and pushes the resulting committed history. It then reads the remote branch to verify the exact commit. Merge conflicts are reported before entering a merge; a rejected push preserves local commits. A remote update during the workflow may require another run.
+
+For an explicitly authorized non-interactive push:
+
+```zsh
+bettergit sync --push --yes
+```
+
+`--yes` skips only the push confirmation. A needed merge still requires interactive confirmation; non-interactive runs stop before merging. Plain `bettergit sync` continues to fetch/merge without publishing, and the `git pull` integration never automatically pushes.
+
+### Before the first sync
+
+A plain `git init` does not configure a GitHub destination. Inspect the existing setup:
+
+```sh
+git remote -v
+git branch -vv
+```
+
+If the remote branch already exists but tracking is missing, fetch it and explicitly select it, for example:
+
+```sh
+git fetch origin
+git branch --set-upstream-to=origin/main
+```
+
+Use your actual branch name. Creating a GitHub repository or making its first-ever push remains a native Git setup step. Unrelated histories are not automatically combined.
+
+Stage and commit the files you intend to publish before running sync. Bettergit never automatically stages files, creates a commit for your edits, or uploads uncommitted contents. Dirty worktrees stop with an explanation.
+
+Publishing requires the default push branch to match the upstream, with one push URL identical to the fetch URL. Separate fork destinations, mirror remotes, and multiple push URLs are refused. Only one pinned branch commit is pushed: no force, automatic tags, or recursive submodule pushes. Git hooks, authentication, and GitHub branch protection remain active; protected branches may require a pull request.
+
+**Live-tested on this repository:** on 2026-10-30, `sync --push --yes` published commit `db3393cce8d976f21c8355be57c06333d5c9aaca` to `Nerolithos/Bettergit`'s `main` branch and verified the remote commit. Local validation also passed 150 isolated tests, including 13 publication tests. See [validation results](docs/sync-review-results.json).
+
 ## When a command was interrupted
 
 ```zsh
@@ -172,6 +222,7 @@ After a supported `init`, Bettergit can offer a `.gitignore` for detected Python
 | `doctor` | Investigate local Git slowness |
 | `doctor --network` | Opt into a bounded read-only remote probe |
 | `doctor --experiment untracked-cache` | Compare a setting using temporary indexes |
+| `sync --push` | Fetch, review/merge, confirm publication, and verify the remote branch |
 | `sync --plan` | Fetch and save a merge preview |
 | `sync --apply <ID>` | Revalidate and confirm a saved merge plan |
 | `check` | Inspect cached upstream state |

@@ -88,3 +88,5 @@ Latest diagnostic iteration validation: **137 tests passed**, including six new 
 Added `sync --push` for repositories that already have a matching upstream and push destination. The workflow fetches, previews/asks before merging when needed, confirms publication, pushes a pinned commit without force, and verifies the remote branch. Dirty worktrees stop without automatic commits. Separate push URLs, mirror remotes, and triangular destinations require native Git review.
 
 Local full validation for sync publication: **150 tests passed**, including 13 publication tests. All six isolated stages passed; protected user configuration was unchanged. See [sync-review-results.json](sync-review-results.json).
+
+Live GitHub test succeeded on 2026-10-30: `sync --push --yes` published `db3393cce8d976f21c8355be57c06333d5c9aaca` to `Nerolithos/Bettergit`, branch `main`, and verified the remote commit. This live case was local-ahead; divergent merges, cancellation, stale plans, hooks, and races were tested against local remotes.
