@@ -1,0 +1,55 @@
+{
+  "created_at": "2026-10-30T04:20:48.729636+00:00",
+  "python": "3.12.5",
+  "git": "/opt/homebrew/Cellar/git/2.45.2/bin/git",
+  "isolation": {
+    "private_home": true,
+    "private_zdotdir": true,
+    "system_git_config_disabled": true,
+    "network_protocols_disabled": true
+  },
+  "checks": [
+    {
+      "name": "versions",
+      "exit_code": 0,
+      "seconds": 0.039,
+      "log": "/private/tmp/Bettergit-sync-verified/versions.log"
+    },
+    {
+      "name": "unittest",
+      "exit_code": 0,
+      "seconds": 49.282,
+      "log": "/private/tmp/Bettergit-sync-verified/unittest.log"
+    },
+    {
+      "name": "workflow_measurement",
+      "exit_code": 0,
+      "seconds": 1.095,
+      "log": "/private/tmp/Bettergit-sync-verified/workflow_measurement.log"
+    },
+    {
+      "name": "diagnostic_evaluation",
+      "exit_code": 0,
+      "seconds": 0.077,
+      "log": "/private/tmp/Bettergit-sync-verified/diagnostic_evaluation.log"
+    },
+    {
+      "name": "zsh_syntax",
+      "exit_code": 0,
+      "seconds": 0.02,
+      "log": "/private/tmp/Bettergit-sync-verified/zsh_syntax.log"
+    },
+    {
+      "name": "zsh_smoke",
+      "exit_code": 0,
+      "seconds": 0.237,
+      "log": "/private/tmp/Bettergit-sync-verified/zsh_smoke.log"
+    }
+  ],
+  "isolated_config_unchanged": true,
+  "protected_user_configs_unchanged": true,
+  "passed": true,
+  "test_count": 150,
+  "publish_tests": 13,
+  "live_github_sync": "pending"
+}

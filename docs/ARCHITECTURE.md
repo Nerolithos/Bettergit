@@ -5,6 +5,7 @@
 | Module | Responsibility |
 | --- | --- |
 | bettergit.py | CLI, confirmations, native command execution, slow-command observer |
+| bettergit_publish.py | Confirmed, pinned-commit publication and remote verification |
 | bettergit_snapshot.py | Short-lived worktree/configuration/reference observations |
 | bettergit_workflow.py | Merge plans, durable records, backup refs, reconciliation, recovery branches |
 | bettergit_diagnostics.py | Bounded local/remote diagnostics and Trace2 interpretation |
@@ -62,3 +63,17 @@ A configured CI matrix covers Ubuntu/macOS and Python 3.10/3.12. Local results a
 The optional GitHub CLI adapter has a shared time budget, per-request timeout, output cap, and pagination limits. REST calls explicitly use GET; the narrowly allowed `gh pr view` query supplies server review decisions. No mutation commands are exposed. Reports omit raw API errors and credentials.
 
 Rules, required checks, status contexts, reviews, and the final PR observation retain completeness/provenance markers. Test-merge checks take precedence when observed. Unknown policies or collection gaps cannot establish readiness. A final reread detects some concurrent updates; GitHub responses are not an atomic snapshot, and this tool never authorizes a merge.
+
+## Diagnostic coverage and interpretation
+
+Doctor adds `coverage.complete`, `coverage.incomplete_probes`, and `assessment.state`. Completion describes attempted probes, not exhaustive root-cause coverage. Failed/skipped observations cannot establish the absence of a bottleneck. Known remote errors map to fixed evidence/action text without persisting stderr; classification remains heuristic.
+
+Status probes use Git's no-optional-locks flag, disable fsmonitor before discovery, and ignore submodule contents. A probe-policy identifier invalidates older baseline comparisons. Tests exercise a real executable fsmonitor helper, verify it was not invoked, and compare the original index byte-for-byte.
+
+## Explicit publication
+
+`sync --push` completes the managed merge workflow before publishing. It requires a clean worktree, a completed/current plan, a matching upstream/default push branch, one push URL equal to the fetch URL, and non-mirror configuration. Triangular destinations are deliberately rejected. Push confirmation can be skipped with `--yes`; merge confirmation cannot.
+
+The push uses an explicit commit ID and one branch refspec, no force, no tag following, and no recursive submodule pushes. Existing hooks and server policies remain active. Native server checks reject incompatible concurrent updates. A read-only remote query verifies the published commit; successful native push alone does not establish a verified result. Records preserve publication states (`running_or_interrupted`, `unverified`, `verified`). Interrupted or failed publication must be inspected and retried, never automatically rolled back.
+
+Publication and merge are separate operations: a failed push leaves local merge commits in place. This is not a distributed transaction. GitHub branch protection may require a PR instead of a direct push.

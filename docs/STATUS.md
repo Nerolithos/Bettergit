@@ -10,7 +10,7 @@ Assessment date: 2026-10-30.
 | --- | --- | --- |
 | Git appears stuck | Trace2 stage evidence; local measurements; optional remote read probe | Evidence is heuristic; unknown remains a valid result |
 | Considering a performance setting | Paired untracked-cache experiment with disposable indexes | No permanent write-back; split indexes and external filters excluded |
-| Local branch and upstream diverged | Fetch, immutable merge plan, conflict preview, revalidation, confirmation | Merge/fast-forward only; no managed rebase or push |
+| Local branch and upstream diverged | Fetch, immutable merge plan, conflict preview, revalidation, confirmation | Merge/fast-forward plus explicit sync --push to a matching tracking branch; no managed rebase |
 | A managed operation was interrupted | Durable records, backup refs, read-only reconciliation, matching merge continue/abort | No global transaction lock against native Git clients |
 | Want the previous commit accessible | Confirmed creation of a recovery branch | No snapshot of arbitrary uncommitted or ignored file contents |
 | Starting a repository | Optional project-aware .gitignore after simple git init | No full project scaffolding or GitHub repository creation |
@@ -74,3 +74,17 @@ The project and checkout are now named Bettergit. The lowercase `bettergit` comm
 The PR-specific suite passes 43 tests using captured evidence and a fake GitHub CLI executable. Live GitHub access has not been tested in this workspace; GitHub CLI is not installed. See [PR explanation boundaries](PR_EXPLAIN.md) and the latest validation record in [pr-review-results.json](pr-review-results.json).
 
 Latest full isolated validation: **131 tests passed** on macOS, Python 3.12.5, Git 2.45.2, and Zsh 5.9. All six validation stages passed; protected user configuration and private configuration were unchanged. Logs use English. Reference Git invocation counts remain 20/30. The suite includes 43 PR tests; authenticated GitHub validation and remote CI remain outstanding.
+
+## Diagnostic clarity iteration
+
+Doctor now separates findings, findings with incomplete evidence, incomplete runs, and inconclusive runs. Reports name failed/skipped probes and distinguish known remote error signatures with targeted next steps. Timeout is not proof of a network fault. Status probes disable fsmonitor from discovery onward, ignore submodules, and prohibit optional index writes. Probe policy is part of baseline compatibility. See [diagnostic interpretation](DIAGNOSTICS.md).
+
+The user supplied a GitHub screenshot showing all four previous-revision jobs passing: macOS/Ubuntu with Python 3.10/3.12. This is user-provided evidence, not independent verification of the latest local edits. New remote CI results remain pending.
+
+Latest diagnostic iteration validation: **137 tests passed**, including six new diagnostic test methods, on macOS/Python 3.12.5/Git 2.45.2/Zsh 5.9. All isolated stages passed, configuration fingerprints remained unchanged, English logs contained no CJK text, and workflow invocation counts remained 20/30. Network error cases are controlled fixtures rather than live network validation. See [diagnostic-clarity-results.json](diagnostic-clarity-results.json).
+
+## Explicit sync publication
+
+Added `sync --push` for repositories that already have a matching upstream and push destination. The workflow fetches, previews/asks before merging when needed, confirms publication, pushes a pinned commit without force, and verifies the remote branch. Dirty worktrees stop without automatic commits. Separate push URLs, mirror remotes, and triangular destinations require native Git review.
+
+Local full validation for sync publication: **150 tests passed**, including 13 publication tests. All six isolated stages passed; protected user configuration was unchanged. See [sync-review-results.json](sync-review-results.json).

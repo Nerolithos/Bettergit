@@ -98,7 +98,7 @@ def engine():
     return Engine(probe, run_git, confirm, say)
 
 
-def sync(fetch=True, plan_only=False, operation_id=None, json_output=False):
+def sync(fetch=True, plan_only=False, operation_id=None, json_output=False, push=False, yes=False):
     try:
         workflow = engine()
         with workflow.store.lock():
@@ -112,9 +112,16 @@ def sync(fetch=True, plan_only=False, operation_id=None, json_output=False):
                 workflow.describe(operation)
             if operation['mergeability'] == 'conflicted':
                 return 1
-            if not fetch or plan_only or operation['mergeability'] == 'up_to_date':
+            if not fetch or plan_only:
                 return 0
-            return workflow.apply(operation)
+            if operation['mergeability'] != 'up_to_date':
+                rc = workflow.apply(operation)
+                if rc:
+                    return rc
+            if push:
+                from bettergit_publish import publish
+                return publish(workflow, operation, yes=yes)
+            return 0
     except RuntimeError as exc:
         say(str(exc))
         return 1
@@ -178,6 +185,8 @@ def main(argv=None):
     modes.add_argument('--apply', metavar='ID', help='Revalidate and apply a saved plan')
     modes.add_argument('--continue', dest='resume', metavar='ID', help='Continue a recorded unfinished merge')
     modes.add_argument('--abort', metavar='ID', help='Abort a recorded unfinished merge')
+    sync_parser.add_argument('--push', action='store_true', help='After synchronization, confirm and push committed history to the matching tracking branch')
+    sync_parser.add_argument('--yes', action='store_true', help='Skip push confirmation with --push; merge confirmation is still required')
     sync_parser.add_argument('--json', action='store_true', help='Available with --plan only')
     commands.add_parser('check', help='Inspect the cached upstream without fetching or merging')
     reconcile = commands.add_parser('reconcile', help='Compare records, references, and worktree state without changing them')
@@ -255,13 +264,17 @@ def main(argv=None):
                     say('Baseline version, platform, or sampling differs; skipping ratios. Save a new baseline.')
             return 1 if any(f['code'] == 'repository_unavailable' for f in report['findings']) else 0
         if ns.action == 'sync':
+            if ns.push and (ns.plan or ns.resume or ns.abort):
+                parser.error('--push cannot be combined with --plan, --continue, or --abort')
+            if ns.yes and not ns.push:
+                parser.error('--yes requires --push')
             if ns.json and not ns.plan:
                 parser.error('--json currently requires sync --plan')
             if ns.resume or ns.abort:
                 workflow = engine()
                 with workflow.store.lock():
                     return workflow.resume(ns.resume or ns.abort, abort=bool(ns.abort))
-            return sync(plan_only=ns.plan, operation_id=ns.apply, json_output=ns.json)
+            return sync(plan_only=ns.plan, operation_id=ns.apply, json_output=ns.json, push=ns.push, yes=ns.yes)
         if ns.action == 'check':
             return sync(fetch=False)
         if ns.action == 'reconcile':

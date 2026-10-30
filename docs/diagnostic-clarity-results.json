@@ -1,0 +1,62 @@
+{
+  "created_at": "2026-10-30T03:53:49.568872+00:00",
+  "python": "3.12.5",
+  "git": "/opt/homebrew/Cellar/git/2.45.2/bin/git",
+  "isolation": {
+    "private_home": true,
+    "private_zdotdir": true,
+    "system_git_config_disabled": true,
+    "network_protocols_disabled": true
+  },
+  "checks": [
+    {
+      "name": "versions",
+      "exit_code": 0,
+      "seconds": 0.039,
+      "log": "/private/tmp/Bettergit-diagnostic-verified/versions.log"
+    },
+    {
+      "name": "unittest",
+      "exit_code": 0,
+      "seconds": 43.584,
+      "log": "/private/tmp/Bettergit-diagnostic-verified/unittest.log"
+    },
+    {
+      "name": "workflow_measurement",
+      "exit_code": 0,
+      "seconds": 1.103,
+      "log": "/private/tmp/Bettergit-diagnostic-verified/workflow_measurement.log"
+    },
+    {
+      "name": "diagnostic_evaluation",
+      "exit_code": 0,
+      "seconds": 0.075,
+      "log": "/private/tmp/Bettergit-diagnostic-verified/diagnostic_evaluation.log"
+    },
+    {
+      "name": "zsh_syntax",
+      "exit_code": 0,
+      "seconds": 0.01,
+      "log": "/private/tmp/Bettergit-diagnostic-verified/zsh_syntax.log"
+    },
+    {
+      "name": "zsh_smoke",
+      "exit_code": 0,
+      "seconds": 0.232,
+      "log": "/private/tmp/Bettergit-diagnostic-verified/zsh_smoke.log"
+    }
+  ],
+  "isolated_config_unchanged": true,
+  "protected_user_configs_unchanged": true,
+  "passed": true,
+  "project": "Bettergit",
+  "tests_passed": 137,
+  "new_diagnostic_tests": 6,
+  "live_network_validation": false,
+  "previous_ci_evidence": "User-provided screenshot: previous revision, Ubuntu/macOS x Python 3.10/3.12 passed",
+  "reference_git_invocations": {
+    "fast_forward": 20,
+    "diverged_clean_merge": 30
+  },
+  "english_logs_no_cjk": true
+}

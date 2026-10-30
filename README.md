@@ -58,7 +58,9 @@ bettergit doctor --budget 15 --samples 3 --json
 bettergit doctor --network --remote origin --budget 20
 ```
 
-Local diagnostics compare tracked-only and untracked-file scans, measure process startup, and sample directory structure. Network probes are opt-in; normal diagnostics do not contact your remote.
+Reports distinguish findings, findings with gaps, incomplete evidence, and inconclusive runs. Failed or skipped probes are listed explicitly. Network failures have separate DNS, proxy, SSH host-key, authentication, TLS, connection, and repository-access explanations with specific next steps. A timeout alone never establishes a network outage.
+
+Local diagnostics compare tracked-only and untracked-file scans, measure process startup, and sample directory structure. Network probes are opt-in; normal diagnostics do not contact your remote. Status probes disable fsmonitor, skip submodule contents, and avoid optional index writes; their timing excludes those costs. See [diagnostic interpretation](docs/DIAGNOSTICS.md).
 
 ### Test a performance setting without committing to it
 

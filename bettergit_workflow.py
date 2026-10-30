@@ -264,7 +264,7 @@ class Engine:
         self.say(f"Local branch: {operation['ahead']} ahead, {operation['behind']} behind.")
         push = operation.get('push_target')
         if push:
-            self.say(f"Default push location for this branch: {push['remote']!r} {push['ref']!r} (informational; no push will run).")
+            self.say(f"Default push location for this branch: {push['remote']!r} {push['ref']!r} (publishing requires explicit sync --push).")
         else:
             self.say('The default push target is unknown; upstream is not assumed to be the push target.')
         if operation['mergeability'] == 'conflicted':
