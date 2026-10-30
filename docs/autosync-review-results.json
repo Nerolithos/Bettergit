@@ -67,5 +67,14 @@
   "test_count": 185,
   "automatic_sync_tests": 11,
   "behavior": "Plain sync automatically stages all non-ignored changes, commits a snapshot version and UTC timestamp, integrates clean updates, pushes and verifies",
-  "scope": "Local isolated suite; live synchronization is verified separately by the operation record and GitHub run"
+  "scope": "Local isolated suite; live synchronization is verified separately by the operation record and GitHub run",
+  "live_sync": {
+    "command": "python3 -B bettergit.py sync",
+    "verified": true,
+    "commit": "6f3076f26dc1ce722531131d0c1661c2d80c0d0a",
+    "version": "v0.0.6",
+    "timestamp": "2026-10-30T05:29:58Z",
+    "manual_add_or_commit": false,
+    "scope": "Current Bettergit repository; local uncommitted changes, tracked main branch"
+  }
 }

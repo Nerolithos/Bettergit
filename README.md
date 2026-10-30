@@ -130,6 +130,8 @@ From any subdirectory, Bettergit automatically:
 4. Applies a fast-forward or clean merge without asking, then pushes one branch without force.
 5. Reads the remote branch to verify the resulting commit.
 
+Live-tested on this repository on 2026-10-30: plain `sync` staged changes, created `Bettergit sync v0.0.6 | 2026-10-30T05:29:58Z` (`6f3076f`), pushed to GitHub, and verified the remote commit.
+
 No confirmation is required in this flow. `sync --push` and `sync --push --yes` remain compatibility spellings for the same automatic flow. Without shell integration, use `python3 /path/to/Bettergit/bettergit.py sync`.
 
 **Snapshot versions:** `v0.0.N` uses the local branch's first-parent commit count plus one. It labels a snapshot, not a semantic release; it does not edit version files or create tags. Shallow or rewritten histories can repeat labels. The timestamp is UTC. No changes means no empty commit, while existing local commits can still be pushed.
