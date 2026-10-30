@@ -44,7 +44,7 @@ The implementation has meaningful reliability mechanisms, but it is not a mature
 | 1. Evidence-based Git diagnostics | Implemented core; paired untracked-cache experiment added; field coverage remains small |
 | 2. Previewable, recoverable synchronization | Implemented and deepened for merge/fast-forward; rebase/refspec-aware push remain future work |
 | 3. Explain why a PR cannot merge | Initial read-only implementation: revision-aware checks, rules, reviews, and explicit unknown evidence |
-| 4. Worktree environment lifecycle | Not implemented as a user-facing feature |
+| 4. Worktree environment lifecycle | Detached checkpoint recovery available through recover; general lifecycle automation remains deferred |
 | 5. Operation history and recovery | Implemented for managed merge operations; general file snapshots/undo not implemented |
 
 ## Previous core iteration
@@ -90,3 +90,17 @@ Added `sync --push` for repositories that already have a matching upstream and p
 Local full validation for sync publication: **150 tests passed**, including 13 publication tests. All six isolated stages passed; protected user configuration was unchanged. See [sync-review-results.json](sync-review-results.json).
 
 Live GitHub test succeeded on 2026-10-30: `sync --push --yes` published `db3393cce8d976f21c8355be57c06333d5c9aaca` to `Nerolithos/Bettergit`, branch `main`, and verified the remote commit. This live case was local-ahead; divergent merges, cancellation, stale plans, hooks, and races were tested against local remotes.
+
+## Unified history and recovery iteration
+
+No top-level commands were added. `history <ID>` now gives a useful detail view combining saved state, fresh reconciliation, checkpoint availability, historical push state, and recovery checkout locations. `recover <ID> --worktree PATH` creates a verified detached checkpoint checkout while preserving today's worktree. It supports recovery from another linked worktree, refuses existing/nested destinations, rechecks after confirmation, and preserves failed checkout evidence. It is not a backup of arbitrary uncommitted files.
+
+This deliberately avoids a second worktree-management CLI. General worktree lifecycle, environment setup, and automatic cleanup remain deferred. See [workflow rationale and boundaries](RECOVERY.md).
+
+Latest recovery validation: **164 tests passed**, including 14 new recovery/history tests. All six isolated validation stages passed, protected user configuration was unchanged, and English logs contain no CJK text. A real-project history inspection exposed and verified a fix for ahead-only sync records after later commits: reconciliation no longer assumes a merge preview tree exists. Recovery checkout tests used temporary local repositories. See [recovery-review-results.json](recovery-review-results.json).
+
+## CI evidence iteration
+
+The existing four-environment workflow now preserves stage evidence, publishes deterministic English summaries, enforces existing invocation budgets and diagnostic fixture expectations, and saves per-matrix artifacts for 14 days. Timeout/launch failures retain status and logs. Official Action v7 references are SHA-pinned; grouped weekly Dependabot updates maintain them. No public commands or AI accounts were added.
+
+Local validation: **174 tests passed**, including ten CI evidence tests. A deliberately failing temporary test suite verified that failure evidence survives and later stages still run. A real timed-out subprocess test verified same-group child termination. All seven validation stages and configuration fingerprints passed. Workflow syntax passed actionlint 1.7.12 (official archive SHA256 verified); shellcheck/pyflakes integrations were disabled for that static check. Remote execution is verified separately from local results. See [CI design](CI.md) and [ci-review-results.json](ci-review-results.json).

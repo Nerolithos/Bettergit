@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Measure helper overhead on local temporary repositories; no external remote."""
 from collections import Counter
+import argparse
 import json
 from pathlib import Path
 import sys
@@ -48,4 +49,10 @@ def measure(diverged):
 
 
 if __name__ == '__main__':
-    print(json.dumps([measure(False), measure(True)], indent=2))
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--output', type=Path)
+    options = parser.parse_args()
+    result = [measure(False), measure(True)]
+    if options.output:
+        options.output.write_text(json.dumps(result, indent=2) + '\n')
+    print(json.dumps(result, indent=2))

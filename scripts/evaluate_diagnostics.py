@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Evaluate labelled synthetic traces; does not claim field accuracy."""
+import argparse
 import json
 from pathlib import Path
 import sys
@@ -39,6 +40,11 @@ def evaluate():
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--output', type=Path)
+    options = parser.parse_args()
     result = evaluate()
+    if options.output:
+        options.output.write_text(json.dumps(result, indent=2) + '\n')
     print(json.dumps(result, indent=2))
     raise SystemExit(0 if result['passed'] else 1)

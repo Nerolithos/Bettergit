@@ -5,6 +5,7 @@
 | Module | Responsibility |
 | --- | --- |
 | bettergit.py | CLI, confirmations, native command execution, slow-command observer |
+| bettergit_recovery.py | Unified history inspection and detached checkpoint worktrees |
 | bettergit_publish.py | Confirmed, pinned-commit publication and remote verification |
 | bettergit_snapshot.py | Short-lived worktree/configuration/reference observations |
 | bettergit_workflow.py | Merge plans, durable records, backup refs, reconciliation, recovery branches |
@@ -77,3 +78,11 @@ Status probes use Git's no-optional-locks flag, disable fsmonitor before discove
 The push uses an explicit commit ID and one branch refspec, no force, no tag following, and no recursive submodule pushes. Existing hooks and server policies remain active. Native server checks reject incompatible concurrent updates. A read-only remote query verifies the published commit; successful native push alone does not establish a verified result. Records preserve publication states (`running_or_interrupted`, `unverified`, `verified`). Interrupted or failed publication must be inspected and retried, never automatically rolled back.
 
 Publication and merge are separate operations: a failed push leaves local merge commits in place. This is not a distributed transaction. GitHub branch protection may require a PR instead of a direct push.
+
+## Recovery worktree boundaries
+
+`history <ID>` combines the stored record, read-only reconciliation, checkpoint availability, and recorded recovery locations. Git registry flags are read with NUL-delimited porcelain; unrelated worktree contents are not recursively scanned. Publication status is explicitly historical. Missing backup refs remain visible instead of hiding operation details.
+
+`recover <ID> --worktree PATH` shares the existing confirmation and recovery model. It refuses existing destinations and nested worktrees, checks the checkpoint/destination again after confirmation, exclusively reserves the directory, and saves `creating_or_interrupted` before native Git creates the detached checkout. Checkout failure preserves the directory and records `needs_review`. Successful creation is verified against the expected commit, common repository, root, detached HEAD, and status. The current index/worktree is never reset or switched by this workflow. Hooks/filters can have external side effects and are not sandboxed.
+
+Git and the filesystem are not one transaction. Another process can still change paths or metadata; failures preserve evidence instead of deleting potentially valuable contents. Registration is observational, not a claim of content integrity. History displays at most 20 recent recovery attempts; the full record remains in JSON. Creation refuses invalid attempt records or more than 100 attempts per operation. General worktree creation, deletion, pruning, dependency installation, and environment copying are left to native tools.

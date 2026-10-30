@@ -161,32 +161,30 @@ Publishing requires the default push branch to match the upstream, with one push
 
 **Live-tested on this repository:** on 2026-10-30, `sync --push --yes` published commit `db3393cce8d976f21c8355be57c06333d5c9aaca` to `Nerolithos/Bettergit`'s `main` branch and verified the remote commit. Local validation also passed 150 isolated tests, including 13 publication tests. See [validation results](docs/sync-review-results.json).
 
-## When a command was interrupted
+## Inspect history and recover without disturbing today's work
+
+Start with one history flow:
 
 ```zsh
 bettergit history
-bettergit reconcile <ID> --json
+bettergit history <ID>
 ```
 
-`reconcile` compares the record with commits, references, worktree state, and Git operation markers. It can distinguish incomplete preparation, a matching unfinished merge, a completed result with incomplete bookkeeping, or a branch changed by another process. It reports evidence without resetting the repository or silently rewriting the record.
+The detail view combines the saved operation with a fresh repository inspection: what was recorded, what Git shows now, whether the checkpoint still exists, and which action fits the state. It also shows recorded publication results and recovery checkout locations. Publication results are historical; history does not contact GitHub.
 
-For a matching unfinished merge:
+To inspect the version before a managed operation in a separate directory:
 
 ```zsh
-bettergit sync --continue <ID>
-bettergit sync --abort <ID>
+bettergit recover <ID> --worktree ../recovery-checkout
 ```
 
-Both ask for confirmation. Aborting can discard conflict-resolution edits.
+Review the destination and confirm. Bettergit creates a detached worktree at the verified checkpoint, leaving your current branch, staged changes, and files in place. The directory must be new and outside existing worktrees. It verifies the resulting commit, repository, detached state, and cleanliness; unexpected checkout changes are marked `needs_review`.
 
-To keep an accessible reference to the original commit:
+The recovery contains **committed checkpoint contents**, not a backup of uncommitted, ignored, or untracked files. Existing checkout hooks and filters may run and are not sandboxed. Nothing is automatically deleted, even after failure.
 
-```zsh
-bettergit recover <ID> --preview
-bettergit recover <ID> --create-branch
-```
+Use `bettergit history <ID>` again to find the checkout and inspect its registry/lock/prunable flags. These flags come from Git's worktree registry; they do not establish that every file is healthy or that cleanup is safe. Keep any new work before using native Git to remove it.
 
-Recovery creates a new branch at the saved commit and leaves your current worktree in place. It is not a universal undo or a backup of uncommitted files.
+For a matching unfinished merge, history suggests `sync --continue <ID>` or `sync --abort <ID>`. Both ask for confirmation; aborting can discard conflict-resolution edits. For advanced use, `reconcile <ID> --json` remains available, and `recover <ID> --create-branch` creates only a recovery branch. History details and recovery also support JSON output.
 
 ## When a pull request looks green but cannot merge
 
@@ -227,9 +225,9 @@ After a supported `init`, Bettergit can offer a `.gitignore` for detected Python
 | `sync --apply <ID>` | Revalidate and confirm a saved merge plan |
 | `check` | Inspect cached upstream state |
 | `pr explain <PR> --repo OWNER/REPO` | Explain checks, reviews, and merge blockers |
-| `history` | Find recorded operations |
+| `history [ID]` | Find operations or inspect their current state and recovery actions |
 | `reconcile <ID>` | Inspect the actual state after an interruption |
-| `recover <ID> --create-branch` | Create a branch at a saved pre-operation commit |
+| `recover <ID> --worktree <PATH>` | Inspect a saved checkpoint in a separate checkout |
 
 `doctor`, `sync --plan`, `history`, `reconcile`, and `recover` support JSON output. `sync --json` requires `--plan`.
 
@@ -247,7 +245,7 @@ Existing hooks and signing configuration remain active during managed merges. Pr
 
 The core includes repository snapshots, atomic backup-reference creation, durable operation records, bounded subprocesses, ignored-file collision checks, and real process-termination tests. Local reference measurements reduced direct Git launches from **69 to 20** for fast-forward synchronization and **74 to 30** for a clean divergent merge; these are scenario-specific counts, not a universal speed claim.
 
-Read-only PR merge-blocker explanations are now available through an optional GitHub CLI adapter. Managed worktree environments, rebase previews, and file-level undo remain on the roadmap. Windows is not currently supported. See [project status and priorities](docs/STATUS.md) for the fuller assessment.
+Read-only PR merge-blocker explanations are now available through an optional GitHub CLI adapter. Separate recovery worktrees are available through `recover`; general worktree environment automation, rebase previews, and file-level undo remain on the roadmap. Windows is not currently supported. See [project status and priorities](docs/STATUS.md) for the fuller assessment.
 
 ## Test without touching your terminal setup
 
@@ -256,6 +254,10 @@ python3 scripts/test_isolated.py --measure
 ```
 
 Tests use temporary HOME/ZDOTDIR directories, private Git configuration, local test remotes, and an independent Zsh process. Test messages and Git diagnostics use an English locale. Synthetic error cases and a fake SSH helper cover transport behavior without contacting an external server.
+
+Each CI matrix job publishes an English summary and retains stage logs plus JSON evidence as a downloadable artifact for 14 days. Failed and timed-out stages remain visible; incomplete evidence never becomes a pass. The same report can be generated locally with `python3 scripts/validation_report.py --input /tmp/bettergit-validation`.
+
+CI gates the existing Git invocation budgets (25 fast-forward, 30 divergent) and labelled diagnostic expectations. Elapsed timings remain informational. Action references are pinned to verified commit SHAs and maintained by grouped weekly Dependabot updates. No AI account or additional Bettergit command is needed.
 
 The runner verifies protected user configuration files remain unchanged. It also measures workflow overhead and evaluates labelled diagnostic fixtures; small fixture-set results are not a real-world accuracy claim.
 

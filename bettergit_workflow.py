@@ -333,6 +333,8 @@ class Engine:
             return False
         if not operation['ahead']:
             return state.head == operation['target']
+        if operation['mergeability'] != 'clean_merge':
+            return False
         proof = self.get(['show', '--no-patch', '--no-show-signature', '--no-notes', '--format=%H%x00%T%x00%P', state.head]).split('\0')
         return (len(proof) == 3 and proof[0] == state.head and proof[1] == operation['preview_tree']
                 and proof[2].split() == [operation['before'], operation['target']])

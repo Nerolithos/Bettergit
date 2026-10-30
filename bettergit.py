@@ -193,12 +193,14 @@ def main(argv=None):
     reconcile.add_argument('id')
     reconcile.add_argument('--json', action='store_true')
     history = commands.add_parser('history', help='List saved operation records')
+    history.add_argument('id', nargs='?', help='Inspect a saved operation and show recovery actions')
     history.add_argument('--json', action='store_true')
     recover = commands.add_parser('recover', help='Preview a recovery point or create a recovery branch')
     recover.add_argument('id')
     mode = recover.add_mutually_exclusive_group()
     mode.add_argument('--preview', action='store_true')
     mode.add_argument('--create-branch', action='store_true')
+    mode.add_argument('--worktree', metavar='PATH', help='Confirm recovery into a new detached worktree; does not switch or reset current files')
     recover.add_argument('--json', action='store_true')
     ns = parser.parse_args(argv)
     try:
@@ -288,6 +290,15 @@ def main(argv=None):
             return 0
         if ns.action == 'history':
             workflow = engine()
+            if ns.id:
+                from bettergit_recovery import history_detail, render_detail
+                with workflow.store.lock():
+                    detail = history_detail(workflow, ns.id)
+                if ns.json:
+                    print(json.dumps(detail, ensure_ascii=True, indent=2))
+                else:
+                    render_detail(detail, say)
+                return 0
             records = workflow.store.history()
             if ns.json:
                 print(json.dumps(records, ensure_ascii=True, indent=2))
@@ -298,12 +309,19 @@ def main(argv=None):
                     state = record['state']
                     if state == 'running':
                         state = 'running_or_interrupted (run reconcile before continue/abort/recover)'
+                    publication = record.get('publication')
+                    if isinstance(publication, dict):
+                        state += ' / push=' + repr(publication.get('state', 'unknown'))
                     say(f"{record['id']}  {state}  {record.get('branch', '')!r}  {record.get('created_at', '')}")
             return 0
         if ns.action == 'recover':
             workflow = engine()
             with workflow.store.lock():
-                summary = workflow.recover(ns.id, preview=not ns.create_branch)
+                if ns.worktree:
+                    from bettergit_recovery import recover_worktree
+                    summary = recover_worktree(workflow, ns.id, ns.worktree, preview=False)
+                else:
+                    summary = workflow.recover(ns.id, preview=not ns.create_branch)
             if ns.json:
                 print(json.dumps(summary, ensure_ascii=True, indent=2))
             else:
