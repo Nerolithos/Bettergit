@@ -6,6 +6,8 @@ Bettergit helps you handle the uncertain parts of everyday Git: a command that s
 
 Keep using Git in your terminal. Add evidence when it gets slow, review a merge before applying it, and keep recovery references for the operations Bettergit manages.
 
+Bettergit integrates with GitHub through the authenticated GitHub CLI (`gh`). Its read-only `pr explain` workflow uses the GitHub REST and GraphQL APIs to inspect pull requests, required checks, branch rules, and review decisions, then explain merge blockers or missing evidence. This integration is under active development; live inspection requires GitHub authentication.
+
 ## Why use it?
 
 - **Find out what Git is waiting for.** Identify active file scans, remote transport, credential helpers, hooks, editors, and signing processes. Unknown causes stay unknown.
@@ -15,7 +17,7 @@ Keep using Git in your terminal. Add evidence when it gets slow, review a merge 
 - **Measure an optimization before adopting it.** Compare untracked-cache settings using disposable indexes, with no persistent configuration changes.
 - **Stay in control.** Merges require confirmation. No automatic force-push, stash, rebase, or generated conflict resolution.
 
-No API key, model service, Python packages, or background daemon required. CLI messages and test diagnostics are in English.
+No AI API key, model service, Python packages, or background daemon required. CLI messages and test diagnostics are in English.
 
 ## Get started
 
@@ -262,3 +264,7 @@ CI gates the existing Git invocation budgets (25 fast-forward, 30 divergent) and
 The runner verifies protected user configuration files remain unchanged. It also measures workflow overhead and evaluates labelled diagnostic fixtures; small fixture-set results are not a real-world accuracy claim.
 
 For architecture and measured results, see [architecture and behavioral boundaries](docs/ARCHITECTURE.md). Earlier research and audit notes remain available under [docs](docs/).
+
+## Support
+
+For support, contact [Nerolithos@hotmail.com](mailto:Nerolithos@hotmail.com). Report bugs and request improvements through [GitHub Issues](https://github.com/Nerolithos/Bettergit/issues).
