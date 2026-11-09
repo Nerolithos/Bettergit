@@ -90,6 +90,7 @@ command git init --quiet
 before_enter=$(bindkey '^M')
 source "$1"
 [[ "$(whence -w git)" == 'git: function' ]]
+[[ "$(whence -f bettergit)" == *"/bettergit.py"* && "$(whence -f bettergit)" != *'$_BETTERGIT_DIR'* ]]
 [[ "$(bindkey '^M')" == "$before_enter" ]]
 git --version
 bettergit doctor --samples 1 --budget 4 --json
