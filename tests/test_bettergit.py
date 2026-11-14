@@ -127,6 +127,23 @@ class RepositoryTests(unittest.TestCase):
             bg.init_ignore(['init'])
         self.assertIn('.venv/', Path('.gitignore').read_text())
 
+    def test_failed_push_without_remote_suggests_remote_add(self):
+        repo = self.root / 'no-remote'
+        self.git('init', '-q', str(repo), cwd=self.root)
+        os.chdir(repo)  # setUp registers a cwd restore.
+        stderr = io.StringIO()
+        with patch.object(bg, 'run_git', return_value=128), contextlib.redirect_stderr(stderr):
+            self.assertEqual(bg.main(['run', '--', 'push', 'origin', 'main']), 128)
+        self.assertIn('no remote configured', stderr.getvalue())
+        self.assertIn('git remote add origin <url>', stderr.getvalue())
+
+    def test_failed_push_with_remote_keeps_cautious_hint(self):
+        stderr = io.StringIO()
+        with patch.object(bg, 'run_git', return_value=1), contextlib.redirect_stderr(stderr):
+            self.assertEqual(bg.main(['run', '--', 'push', 'nowhere', 'main']), 1)
+        self.assertIn('push target is not assumed to be upstream', stderr.getvalue())
+        self.assertNotIn('no remote configured', stderr.getvalue())
+
     def test_trace_evidence_redacts_credentials(self):
         trace = self.root / 'trace'
         trace.write_text('{"event":"child_start","sid":"1","child_id":0,"argv":["git-remote-https", "https://secret@example.com"]}\n')

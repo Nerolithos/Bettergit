@@ -30,6 +30,17 @@ def diagnose(trace=None, cwd=None, **options):
     return report
 
 
+def transport_failure_hint(command):
+    """Hint after a failed push/pull. Only an observed empty remote list is stated as fact."""
+    code, out, _ = probe(['remote'])
+    if code == 0 and not out.strip():
+        return (f'Git failed; this repository has no remote configured. Add one with '
+                f'"git remote add origin <url>", then retry the {command}.')
+    # The command may target arbitrary refspecs; never diagnose the wrong target as fact.
+    return (f'Git failed; the {command} target is not assumed to be upstream. '
+            'Run check to inspect tracking, or sync --plan to prepare a merge.')
+
+
 def threshold():
     try:
         value = float(os.environ.get('BETTERGIT_SLOW_SECONDS', '5'))
@@ -342,8 +353,7 @@ def main(argv=None):
             return sync()
         rc = run_git(args)
         if rc and args[:1] in (['push'], ['pull']):
-            # The command may target arbitrary refspecs; never diagnose the wrong target as fact.
-            say('Git failed; the push target is not assumed to be upstream. Run check to inspect tracking, or sync --plan to prepare a merge.')
+            say(transport_failure_hint(args[0]))
         if rc == 0 and args[:1] == ['init'] and (len(args) == 1 or len(args) == 2 and not args[1].startswith('-')):
             init_ignore(args)
         return rc
